@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INCO.HOST — Instant File Hosting</title>
+  <meta name="description" content="Upload images & videos, get instant shareable URLs. Free. No registration. Fast." />
+  <meta property="og:title" content="INCO.HOST" />
+  <meta property="og:description" content="Lightning fast image & video hosting. Upload. Get URL. Done." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: #222222;
+      --accent: #e8ff3c;
+      --accent2: #ff3c3c;
+      --text: #f0f0f0;
+      --muted: #666;
+      --muted2: #444;
+      --success: #3cff8c;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(232,255,60,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,255,60,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    
+    header {
+      padding: 32px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .logo-main {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .logo-dot {
+      color: var(--accent);
+    }
+
+    .logo-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 3px 7px;
+      margin-left: 4px;
+    }
+
+    .platform-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      letter-spacing: 0.1em;
+    }
+
+    .platform-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    
+    .hero {
+      padding: 64px 0 48px;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .stroke {
+      -webkit-text-stroke: 1px var(--text);
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      color: var(--text);
+      letter-spacing: 0.05em;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    
+    .upload-section { padding-bottom: 64px; }
+
+    .drop-zone {
+      border: 1.5px dashed var(--muted2);
+      background: var(--surface);
+      padding: 64px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .drop-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(232,255,60,0.03) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(232,255,60,0.04);
+    }
+
+    .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
+
+    .drop-zone.drag-over {
+      transform: scale(1.005);
+    }
+
+    .drop-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      display: block;
+      opacity: 0.6;
+    }
+
+    .drop-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .drop-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .drop-types {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .type-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .btn-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 14px 28px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-upload:hover { background: #fff; transform: translateY(-1px); }
+    .btn-upload:active { transform: translateY(0); }
+
+    #file-input { display: none; }
+
+    
+    .progress-wrap {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .progress-bar-outer {
+      height: 3px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .progress-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 8px;
+      letter-spacing: 0.1em;
+    }
+
+    
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-top: 16px;
+      overflow: hidden;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(60, 255, 140, 0.05);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--success);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .result-type-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .result-url-row {
+      display: flex;
+      align-items: center;
+      padding: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-url {
+      flex: 1;
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-copy {
+      padding: 14px 20px;
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-copy:hover { background: var(--accent); color: #000; }
+    .btn-copy.copied { background: var(--success); color: #000; }
+
+    .result-meta {
+      display: flex;
+      gap: 24px;
+      padding: 12px 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .meta-key {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .meta-val {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .result-preview {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      background: #0a0a0a;
+    }
+
+    .result-preview img, .result-preview video {
+      max-width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+    }
+
+    .result-actions {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+
+    .result-action-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .result-action-btn:last-child { border-right: none; }
+    .result-action-btn:hover { background: var(--surface2); color: var(--text); }
+    .result-action-btn.danger:hover { background: rgba(255,60,60,0.1); color: var(--accent2); }
+
+    
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .section-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .recent-section { padding-bottom: 64px; }
+
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .file-item {
+      background: var(--surface);
+      aspect-ratio: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .file-item:hover { opacity: 0.8; }
+
+    .file-item img, .file-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .file-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px;
+    }
+
+    .file-item:hover .file-item-overlay { opacity: 1; }
+
+    .file-item-name {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.05em;
+    }
+
+    .file-item-size {
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .file-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 2.5rem;
+      opacity: 0.3;
+    }
+
+    .file-type-badge-grid {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      background: rgba(0,0,0,0.7);
+      color: var(--accent);
+      padding: 2px 6px;
+      letter-spacing: 0.1em;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      border: 1px dashed var(--border);
+    }
+
+    .empty-state p {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted2);
+      letter-spacing: 0.1em;
+    }
+
+    
+    .api-section { padding-bottom: 64px; }
+
+    .api-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 2px;
+    }
+
+    .api-block-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .method-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      letter-spacing: 0.1em;
+    }
+
+    .method-post { background: var(--accent); color: #000; }
+    .method-get { background: #3c8cff; color: #000; }
+    .method-delete { background: var(--accent2); color: #000; }
+
+    .api-endpoint {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    .api-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 12px 16px;
+    }
+
+    .code-block {
+      background: #0a0a0a;
+      border-top: 1px solid var(--border);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: #aaa;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+
+    .code-block .key { color: var(--accent); }
+    .code-block .val { color: #3cff8c; }
+    .code-block .comment { color: var(--muted2); }
+
+    
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 16px;
+    }
+
+    .footer-left {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted2);
+      letter-spacing: 0.1em;
+    }
+
+    .footer-left span { color: var(--accent); }
+
+    .footer-nav {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-nav a {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted2);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.15s;
+    }
+
+    .footer-nav a:hover { color: var(--text); }
+
+    
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 12px 20px;
+      z-index: 1000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { background: var(--accent2); color: #fff; }
+
+    
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 0 48px;
+    }
+
+    
+    @media (max-width: 600px) {
+      .hero-title { font-size: 3rem; }
+      .hero-stats { gap: 20px; }
+      .drop-zone { padding: 40px 20px; }
+      footer { flex-direction: column; align-items: flex-start; }
+      .file-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <span class="logo-main">INCO<span class="logo-dot">.</span>HOST</span>
+      <span class="logo-tag">v1.0</span>
+    </div>
+    <div class="platform-badge">
+      <span class="platform-dot"></span>
+      <span id="platform-name">DETECTING...</span>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">// INSTANT FILE HOSTING</div>
+    <h1 class="hero-title">
+      UPLOAD.<br>
+      <span class="accent">GET URL.</span><br>
+      <span class="stroke">DONE.</span>
+    </h1>
+    <p class="hero-sub">
+      Drop your images & videos. Get a permanent direct URL in seconds.
+      No account. No limits. No nonsense.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-value" id="stat-files">0</span>
+        <span class="stat-label">Files Hosted</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-maximg">50MB</span>
+        <span class="stat-label">Max Image</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-maxvid">500MB</span>
+        <span class="stat-label">Max Video</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section class="upload-section">
+    <div class="drop-zone" id="drop-zone">
+      <span class="drop-icon">⬆</span>
+      <div class="drop-title">DROP FILES HERE</div>
+      <p class="drop-sub">or click to browse your device</p>
+      <div class="drop-types">
+        <span class="type-tag">JPG</span>
+        <span class="type-tag">PNG</span>
+        <span class="type-tag">GIF</span>
+        <span class="type-tag">WEBP</span>
+        <span class="type-tag">SVG</span>
+        <span class="type-tag">MP4</span>
+        <span class="type-tag">WEBM</span>
+        <span class="type-tag">MOV</span>
+        <span class="type-tag">MKV</span>
+        <span class="type-tag">PDF</span>
+        <span class="type-tag">MP3</span>
+      </div>
+      <button class="btn-upload" onclick="document.getElementById('file-input').click()">
+        ▲ SELECT FILE
+      </button>
+      <input type="file" id="file-input" accept="image/*,video/*,audio/*,.pdf" multiple />
+    </div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progress-bar"></div>
+      </div>
+      <div class="progress-label" id="progress-label">UPLOADING... 0%</div>
+    </div>
+
+    <div id="results-container"></div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- RECENT FILES -->
+  <section class="recent-section">
+    <div class="section-title">RECENT UPLOADS</div>
+    <p class="section-sub">Last 20 files uploaded to this instance</p>
+    <div id="file-grid" class="file-grid">
+      <div class="empty-state" style="grid-column: 1/-1">
+        <p>NO FILES YET — UPLOAD SOMETHING</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- API DOCS -->
+  <section class="api-section">
+    <div class="section-title">API REFERENCE</div>
+    <p class="section-sub">Use INCO.HOST programmatically in your bots, scripts & apps</p>
+
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method-badge method-post">POST</span>
+        <span class="api-endpoint">/api/upload</span>
+      </div>
+      <div class="api-desc">Upload a single file. Returns URL and metadata.</div>
+      <div class="code-block">
+<span class="comment"># cURL</span>
+curl -X POST <span id="api-base-url-1">https://your-domain.com</span>/api/upload \
+  -F <span class="val">"file=@image.png"</span>
+
+<span class="comment"># Response</span>
+{
+  <span class="key">"success"</span>: true,
+  <span class="key">"url"</span>: <span class="val">"https://your-domain.com/f/uuid.png"</span>,
+  <span class="key">"id"</span>: <span class="val">"uuid"</span>,
+  <span class="key">"type"</span>: <span class="val">"image"</span>,
+  <span class="key">"size"</span>: <span class="val">204800</span>,
+  <span class="key">"deleteKey"</span>: <span class="val">"delete-uuid"</span>
+}
+      </div>
+    </div>
+
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method-badge method-post">POST</span>
+        <span class="api-endpoint">/api/upload/multi</span>
+      </div>
+      <div class="api-desc">Upload multiple files at once (max 10). Returns array of URLs.</div>
+      <div class="code-block">
+curl -X POST <span id="api-base-url-2">https://your-domain.com</span>/api/upload/multi \
+  -F <span class="val">"files=@img1.jpg"</span> \
+  -F <span class="val">"files=@video.mp4"</span>
+      </div>
+    </div>
+
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method-badge method-get">GET</span>
+        <span class="api-endpoint">/api/file/:id</span>
+      </div>
+      <div class="api-desc">Get metadata for a specific file by ID.</div>
+      <div class="code-block">
+curl <span id="api-base-url-3">https://your-domain.com</span>/api/file/<span class="val">uuid</span>
+      </div>
+    </div>
+
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method-badge method-delete">DELETE</span>
+        <span class="api-endpoint">/api/delete/:id?key=deleteKey</span>
+      </div>
+      <div class="api-desc">Delete a file using its ID and delete key.</div>
+      <div class="code-block">
+curl -X DELETE <span id="api-base-url-4">https://your-domain.com</span>/api/delete/<span class="val">uuid</span>?key=<span class="val">deleteKey</span>
+      </div>
+    </div>
+
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method-badge method-get">GET</span>
+        <span class="api-endpoint">/api/stats</span>
+      </div>
+      <div class="api-desc">Get platform statistics and file counts.</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      INCO.HOST — by <span>INCONNU BOY TECH</span> — <span id="footer-platform">—</span>
+    </div>
+    <nav class="footer-nav">
+      <a href="/api/info">API INFO</a>
+      <a href="/api/stats">STATS</a>
+      <a href="/health">HEALTH</a>
+    </nav>
+  </footer>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  
+  let BASE_URL = '';
+  let currentDeleteKeys = {};
+
+  async function init() {
+    try {
+      const res = await fetch('/api/info');
+      const info = await res.json();
+      BASE_URL = info.baseURL;
+
+      document.getElementById('platform-name').textContent =
+        `${info.platformIcon} ${info.platform.toUpperCase()}`;
+      document.getElementById('footer-platform').textContent =
+        `${info.platformIcon} ${info.platform}`;
+      document.getElementById('stat-maximg').textContent =
+        formatSize(info.maxImageSize);
+      document.getElementById('stat-maxvid').textContent =
+        formatSize(info.maxVideoSize);
+
+      
+      ['api-base-url-1','api-base-url-2','api-base-url-3','api-base-url-4'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = BASE_URL;
+      });
+
+      loadStats();
+      loadRecent();
+    } catch (e) {
+      console.error('Init failed', e);
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      document.getElementById('stat-files').textContent = data.totalFiles;
+    } catch {}
+  }
+
+  async function loadRecent() {
+    try {
+      const res = await fetch('/api/recent');
+      const data = await res.json();
+      renderFileGrid(data.files);
+    } catch {}
+  }
+
+  
+  document.getElementById('file-input').addEventListener('change', e => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) uploadFiles(files);
+    e.target.value = '';
+  });
+
+  async function uploadFiles(files) {
+    const progressWrap = document.getElementById('progress-wrap');
+    const progressBar = document.getElementById('progress-bar');
+    const progressLabel = document.getElementById('progress-label');
+
+    progressWrap.style.display = 'block';
+    document.getElementById('results-container').innerHTML = '';
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      progressLabel.textContent = `UPLOADING ${i+1}/${files.length}: ${file.name}`;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) {
+              const pct = Math.round((e.loaded / e.total) * 100);
+              progressBar.style.width = pct + '%';
+              progressLabel.textContent = `UPLOADING ${i+1}/${files.length}: ${file.name} — ${pct}%`;
+            }
+          });
+
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+              const data = JSON.parse(xhr.responseText);
+              renderResult(data);
+              resolve();
+            } else {
+              const err = JSON.parse(xhr.responseText);
+              showToast(err.error || 'Upload failed', true);
+              reject();
+            }
+          });
+
+          xhr.addEventListener('error', () => {
+            showToast('Network error during upload', true);
+            reject();
+          });
+
+          xhr.open('POST', '/api/upload');
+          xhr.send(formData);
+        });
+
+      } catch {}
+    }
+
+    progressWrap.style.display = 'none';
+    progressBar.style.width = '0%';
+    loadStats();
+    loadRecent();
+  }
+
+  
+  function renderResult(data) {
+    currentDeleteKeys[data.id] = data.deleteKey;
+
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.id = `result-${data.id}`;
+    card.style.display = 'block';
+
+    const previewHTML = data.type === 'image'
+      ? `<div class="result-preview"><img src="${data.url}" alt="preview" /></div>`
+      : data.type === 'video'
+      ? `<div class="result-preview"><video src="${data.url}" controls muted playsinline></video></div>`
+      : '';
+
+    card.innerHTML = `
+      <div class="result-header">
+        <div class="result-status">
+          ✓ UPLOAD SUCCESSFUL
+        </div>
+        <span class="result-type-badge">${data.type.toUpperCase()}</span>
+      </div>
+      <div class="result-url-row">
+        <div class="result-url" title="${data.url}">${data.url}</div>
+        <button class="btn-copy" onclick="copyURL('${data.url}', this)">COPY URL</button>
+      </div>
+      ${previewHTML}
+      <div class="result-meta">
+        <div class="meta-item">
+          <span class="meta-key">Original Name</span>
+          <span class="meta-val">${data.originalName}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">Size</span>
+          <span class="meta-val">${formatSize(data.size)}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">Type</span>
+          <span class="meta-val">${data.mimeType}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">ID</span>
+          <span class="meta-val">${data.id.slice(0, 8)}...</span>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="result-action-btn" onclick="copyURL('${data.url}', this)">⬡ COPY</button>
+        <button class="result-action-btn" onclick="window.open('${data.url}', '_blank')">↗ OPEN</button>
+        <button class="result-action-btn" onclick="copyMarkdown('${data.url}', '${data.originalName}', '${data.type}')">[ ] MARKDOWN</button>
+        <button class="result-action-btn" onclick="copyBBCode('${data.url}', '${data.type}')">{ } BBCODE</button>
+        <button class="result-action-btn danger" onclick="deleteFile('${data.id}', '${data.deleteKey}', this)">✕ DELETE</button>
+      </div>
+    `;
+
+    document.getElementById('results-container').prepend(card);
+    showToast('FILE UPLOADED — URL READY');
+  }
+
+  
+  function renderFileGrid(files) {
+    const grid = document.getElementById('file-grid');
+    if (!files || files.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>NO FILES YET — UPLOAD SOMETHING</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = files.map(f => {
+      const isImage = f.type === 'image';
+      const isVideo = f.type === 'video';
+      const icon = isImage ? '🖼' : isVideo ? '🎥' : '📄';
+
+      const mediaHTML = isImage
+        ? `<img src="${f.url}" alt="${f.originalName}" loading="lazy" />`
+        : isVideo
+        ? `<video src="${f.url}" muted playsinline></video>`
+        : `<div class="file-icon-wrap">${icon}</div>`;
+
+      return `
+        <div class="file-item" onclick="window.open('${f.url}', '_blank')">
+          ${mediaHTML}
+          <span class="file-type-badge-grid">${f.type.toUpperCase()}</span>
+          <div class="file-item-overlay">
+            <div class="file-item-name">${f.originalName}</div>
+            <div class="file-item-size">${formatSize(f.size)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  
+  const dropZone = document.getElementById('drop-zone');
+
+  dropZone.addEventListener('click', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    document.getElementById('file-input').click();
+  });
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', e => {
+    if (!dropZone.contains(e.relatedTarget)) {
+      dropZone.classList.remove('drag-over');
+    }
+  });
+
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) uploadFiles(files);
+  });
+
+  
+  document.addEventListener('paste', e => {
+    const files = Array.from(e.clipboardData.files);
+    if (files.length > 0) uploadFiles(files);
+  });
+
+  
+  function copyURL(url, btn) {
+    navigator.clipboard.writeText(url).then(() => {
+      if (btn && btn.classList) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ COPIED';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.classList.remove('copied');
+        }, 2000);
+      }
+      showToast('URL COPIED TO CLIPBOARD');
+    });
+  }
+
+  function copyMarkdown(url, name, type) {
+    const md = type === 'image' ? `![${name}](${url})` : `[${name}](${url})`;
+    navigator.clipboard.writeText(md).then(() => showToast('MARKDOWN COPIED'));
+  }
+
+  function copyBBCode(url, type) {
+    const bb = type === 'image' ? `[img]${url}[/img]` : `[url]${url}[/url]`;
+    navigator.clipboard.writeText(bb).then(() => showToast('BBCODE COPIED'));
+  }
+
+  async function deleteFile(id, key, btn) {
+    if (!confirm('Delete this file permanently?')) return;
+    try {
+      const res = await fetch(`/api/delete/${id}?key=${key}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        const card = document.getElementById(`result-${id}`);
+        if (card) card.remove();
+        showToast('FILE DELETED');
+        loadRecent();
+        loadStats();
+      } else {
+        showToast(data.error || 'Delete failed', true);
+      }
+    } catch {
+      showToast('Delete failed', true);
+    }
+  }
+
+  
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.toggle('error', isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  
+  function formatSize(bytes) {
+    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + 'GB';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + 'MB';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(0) + 'KB';
+    return bytes + 'B';
+  }
+
+  init();
+</script>
+</body>
+</html>
