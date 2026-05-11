@@ -1,1181 +1,1538 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>INCO.HOST — Instant File Hosting</title>
-  <meta name="description" content="Upload images & videos, get instant shareable URLs. Free. No registration. Fast." />
-  <meta property="og:title" content="INCO.HOST" />
-  <meta property="og:description" content="Lightning fast image & video hosting. Upload. Get URL. Done." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #080808;
-      --surface: #111111;
-      --surface2: #1a1a1a;
-      --border: #222222;
-      --accent: #e8ff3c;
-      --accent2: #ff3c3c;
-      --text: #f0f0f0;
-      --muted: #666;
-      --muted2: #444;
-      --success: #3cff8c;
-      --font-display: 'Bebas Neue', sans-serif;
-      --font-mono: 'Space Mono', monospace;
-      --font-body: 'DM Sans', sans-serif;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(232,255,60,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(232,255,60,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
-    }
-
-    .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px; }
-
-    
-    header {
-      padding: 32px 0 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-
-    .logo-main {
-      font-family: var(--font-display);
-      font-size: 2.4rem;
-      letter-spacing: 0.08em;
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .logo-dot {
-      color: var(--accent);
-    }
-
-    .logo-tag {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      color: var(--muted);
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      border: 1px solid var(--border);
-      padding: 3px 7px;
-      margin-left: 4px;
-    }
-
-    .platform-badge {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      letter-spacing: 0.1em;
-    }
-
-    .platform-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--success);
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
-
-    
-    .hero {
-      padding: 64px 0 48px;
-      position: relative;
-    }
-
-    .hero-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 16px;
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(3.5rem, 10vw, 7rem);
-      line-height: 0.9;
-      letter-spacing: 0.02em;
-      color: var(--text);
-      margin-bottom: 24px;
-    }
-
-    .hero-title .accent { color: var(--accent); }
-    .hero-title .stroke {
-      -webkit-text-stroke: 1px var(--text);
-      color: transparent;
-    }
-
-    .hero-sub {
-      font-size: 1rem;
-      color: var(--muted);
-      max-width: 480px;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-
-    .hero-stats {
-      display: flex;
-      gap: 32px;
-      margin-top: 32px;
-      flex-wrap: wrap;
-    }
-
-    .stat {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      color: var(--text);
-      letter-spacing: 0.05em;
-    }
-
-    .stat-label {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-    }
-
-    
-    .upload-section { padding-bottom: 64px; }
-
-    .drop-zone {
-      border: 1.5px dashed var(--muted2);
-      background: var(--surface);
-      padding: 64px 32px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .drop-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(232,255,60,0.03) 0%, transparent 60%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .drop-zone:hover, .drop-zone.drag-over {
-      border-color: var(--accent);
-      background: rgba(232,255,60,0.04);
-    }
-
-    .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
-
-    .drop-zone.drag-over {
-      transform: scale(1.005);
-    }
-
-    .drop-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      display: block;
-      opacity: 0.6;
-    }
-
-    .drop-title {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      letter-spacing: 0.05em;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .drop-sub {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
-
-    .drop-types {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
-
-    .type-tag {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      padding: 4px 8px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      letter-spacing: 0.1em;
-    }
-
-    .btn-upload {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--accent);
-      color: #000;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 14px 28px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-upload:hover { background: #fff; transform: translateY(-1px); }
-    .btn-upload:active { transform: translateY(0); }
-
-    #file-input { display: none; }
-
-    
-    .progress-wrap {
-      display: none;
-      margin-top: 24px;
-    }
-
-    .progress-bar-outer {
-      height: 3px;
-      background: var(--border);
-      overflow: hidden;
-    }
-
-    .progress-bar-inner {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.2s ease;
-    }
-
-    .progress-label {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--muted);
-      margin-top: 8px;
-      letter-spacing: 0.1em;
-    }
-
-    
-    .result-card {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      margin-top: 16px;
-      overflow: hidden;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: rgba(60, 255, 140, 0.05);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--success);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .result-type-badge {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      padding: 3px 8px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .result-url-row {
-      display: flex;
-      align-items: center;
-      padding: 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-url {
-      flex: 1;
-      padding: 14px 16px;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--accent);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      letter-spacing: 0.02em;
-    }
-
-    .btn-copy {
-      padding: 14px 20px;
-      background: transparent;
-      border: none;
-      border-left: 1px solid var(--border);
-      color: var(--muted);
-      cursor: pointer;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .btn-copy:hover { background: var(--accent); color: #000; }
-    .btn-copy.copied { background: var(--success); color: #000; }
-
-    .result-meta {
-      display: flex;
-      gap: 24px;
-      padding: 12px 16px;
-      flex-wrap: wrap;
-    }
-
-    .meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .meta-key {
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      color: var(--muted2);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    .meta-val {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .result-preview {
-      padding: 16px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: center;
-      background: #0a0a0a;
-    }
-
-    .result-preview img, .result-preview video {
-      max-width: 100%;
-      max-height: 280px;
-      object-fit: contain;
-    }
-
-    .result-actions {
-      display: flex;
-      border-top: 1px solid var(--border);
-    }
-
-    .result-action-btn {
-      flex: 1;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      border-right: 1px solid var(--border);
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .result-action-btn:last-child { border-right: none; }
-    .result-action-btn:hover { background: var(--surface2); color: var(--text); }
-    .result-action-btn.danger:hover { background: rgba(255,60,60,0.1); color: var(--accent2); }
-
-    
-    .section-title {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      letter-spacing: 0.1em;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .section-sub {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
-
-    .recent-section { padding-bottom: 64px; }
-
-    .file-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1px;
-      background: var(--border);
-    }
-
-    .file-item {
-      background: var(--surface);
-      aspect-ratio: 1;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-
-    .file-item:hover { opacity: 0.8; }
-
-    .file-item img, .file-item video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .file-item-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 10px;
-    }
-
-    .file-item:hover .file-item-overlay { opacity: 1; }
-
-    .file-item-name {
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      letter-spacing: 0.05em;
-    }
-
-    .file-item-size {
-      font-family: var(--font-mono);
-      font-size: 0.5rem;
-      color: var(--accent);
-      margin-top: 2px;
-    }
-
-    .file-icon-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      font-size: 2.5rem;
-      opacity: 0.3;
-    }
-
-    .file-type-badge-grid {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-family: var(--font-mono);
-      font-size: 0.5rem;
-      background: rgba(0,0,0,0.7);
-      color: var(--accent);
-      padding: 2px 6px;
-      letter-spacing: 0.1em;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px;
-      border: 1px dashed var(--border);
-    }
-
-    .empty-state p {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--muted2);
-      letter-spacing: 0.1em;
-    }
-
-    
-    .api-section { padding-bottom: 64px; }
-
-    .api-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      margin-bottom: 2px;
-    }
-
-    .api-block-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .method-badge {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      letter-spacing: 0.1em;
-    }
-
-    .method-post { background: var(--accent); color: #000; }
-    .method-get { background: #3c8cff; color: #000; }
-    .method-delete { background: var(--accent2); color: #000; }
-
-    .api-endpoint {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text);
-      letter-spacing: 0.02em;
-    }
-
-    .api-desc {
-      font-size: 0.8rem;
-      color: var(--muted);
-      padding: 12px 16px;
-    }
-
-    .code-block {
-      background: #0a0a0a;
-      border-top: 1px solid var(--border);
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: #aaa;
-      line-height: 1.8;
-      overflow-x: auto;
-    }
-
-    .code-block .key { color: var(--accent); }
-    .code-block .val { color: #3cff8c; }
-    .code-block .comment { color: var(--muted2); }
-
-    
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 32px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: gap;
-      gap: 16px;
-    }
-
-    .footer-left {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--muted2);
-      letter-spacing: 0.1em;
-    }
-
-    .footer-left span { color: var(--accent); }
-
-    .footer-nav {
-      display: flex;
-      gap: 24px;
-    }
-
-    .footer-nav a {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--muted2);
-      text-decoration: none;
-      letter-spacing: 0.1em;
-      transition: color 0.15s;
-    }
-
-    .footer-nav a:hover { color: var(--text); }
-
-    
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--accent);
-      color: #000;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      padding: 12px 20px;
-      z-index: 1000;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.error { background: var(--accent2); color: #fff; }
-
-    
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 0 0 48px;
-    }
-
-    
-    @media (max-width: 600px) {
-      .hero-title { font-size: 3rem; }
-      .hero-stats { gap: 20px; }
-      .drop-zone { padding: 40px 20px; }
-      footer { flex-direction: column; align-items: flex-start; }
-      .file-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>INCO.HOST — Instant File Hosting</title>
+<meta name="description" content="Upload images & videos, get instant shareable URLs. Free. No registration. Fast."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #03050a;
+  --bg2: #070c14;
+  --surface: #0d1520;
+  --surface2: #111d2e;
+  --border: #1a2d45;
+  --border2: #1f3650;
+  --cyan: #00f5ff;
+  --cyan2: #00c4cc;
+  --orange: #ff6b2b;
+  --green: #00ff88;
+  --red: #ff3b5c;
+  --text: #e8f4ff;
+  --muted: #4a6a8a;
+  --muted2: #2a3f55;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-mono);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2)}
+
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 20%, rgba(0,245,255,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,107,43,0.04) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+.scanlines{
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  pointer-events:none;
+  z-index:0;
+  opacity:.4;
+}
+
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 28px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glitch{
+  0%,100%{clip-path:inset(0 0 98% 0);transform:translateX(0)}
+  20%{clip-path:inset(30% 0 50% 0);transform:translateX(-4px)}
+  40%{clip-path:inset(70% 0 10% 0);transform:translateX(4px)}
+  60%{clip-path:inset(10% 0 80% 0);transform:translateX(-2px)}
+  80%{clip-path:inset(50% 0 30% 0);transform:translateX(2px)}
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes scanMove{from{transform:translateY(-100%)}to{transform:translateY(100vh)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,245,255,0.4)}70%{box-shadow:0 0 0 8px rgba(0,245,255,0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+.scan-line{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,245,255,0.3),transparent);
+  animation:scanMove 6s linear infinite;
+  pointer-events:none;
+  z-index:999;
+}
+
+header{
+  padding:28px 0 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  animation:fadeUp .6s ease both;
+}
+
+.logo{display:flex;align-items:center;gap:12px}
+
+.logo-text{
+  font-family:var(--font-display);
+  font-size:1.6rem;
+  font-weight:800;
+  letter-spacing:0.12em;
+  color:var(--text);
+  position:relative;
+}
+
+.logo-text::after{
+  content:'INCO.HOST';
+  position:absolute;
+  inset:0;
+  color:var(--cyan);
+  animation:glitch 4s ease-in-out infinite;
+  opacity:.6;
+}
+
+.logo-dot{color:var(--cyan)}
+
+.logo-ver{
+  font-size:.55rem;
+  color:var(--muted);
+  letter-spacing:.2em;
+  border:1px solid var(--border2);
+  padding:3px 7px;
+  margin-left:2px;
+  vertical-align:middle;
+}
+
+.status-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:7px 14px;
+  font-size:.6rem;
+  letter-spacing:.15em;
+  color:var(--muted);
+  position:relative;
+  overflow:hidden;
+}
+
+.status-pill::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(0,245,255,0.04),transparent);
+  background-size:200% 100%;
+  animation:shimmer 3s linear infinite;
+}
+
+.status-dot{
+  width:7px;height:7px;
+  background:var(--green);
+  border-radius:50%;
+  animation:pulse 2s ease-in-out infinite;
+  flex-shrink:0;
+}
+
+.platform-label{color:var(--cyan)}
+
+.hero{
+  padding:72px 0 56px;
+  position:relative;
+}
+
+.hero-line{
+  font-size:.65rem;
+  letter-spacing:.35em;
+  color:var(--cyan);
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  animation:fadeUp .6s .1s ease both;
+}
+
+.hero-line::before{
+  content:'';
+  width:32px;height:1px;
+  background:var(--cyan);
+  opacity:.5;
+}
+
+h1{
+  font-family:var(--font-display);
+  font-size:clamp(3rem,9vw,6.5rem);
+  font-weight:800;
+  line-height:.92;
+  letter-spacing:-.01em;
+  margin-bottom:28px;
+  animation:fadeUp .6s .15s ease both;
+}
+
+h1 .line2{
+  -webkit-text-stroke:1px rgba(0,245,255,.4);
+  color:transparent;
+}
+
+h1 .line3{color:var(--cyan)}
+
+.hero-desc{
+  font-size:.82rem;
+  color:var(--muted);
+  line-height:1.9;
+  max-width:440px;
+  margin-bottom:36px;
+  font-weight:300;
+  animation:fadeUp .6s .2s ease both;
+}
+
+.hero-stats{
+  display:flex;
+  gap:0;
+  margin-bottom:0;
+  border:1px solid var(--border);
+  width:fit-content;
+  animation:fadeUp .6s .25s ease both;
+}
+
+.hstat{
+  padding:16px 28px;
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.hstat:last-child{border-right:none}
+
+.hstat-val{
+  font-family:var(--font-display);
+  font-size:1.6rem;
+  font-weight:800;
+  color:var(--text);
+  line-height:1;
+}
+
+.hstat-key{
+  font-size:.52rem;
+  letter-spacing:.18em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.corner-deco{
+  position:absolute;
+  top:0;right:0;
+  width:280px;height:280px;
+  opacity:.07;
+  pointer-events:none;
+}
+
+.corner-deco svg{width:100%;height:100%}
+
+.upload-zone{
+  border:1px solid var(--border2);
+  background:var(--surface);
+  padding:56px 32px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .25s ease;
+  position:relative;
+  overflow:hidden;
+  animation:fadeUp .6s .3s ease both;
+}
+
+.upload-zone::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:0;
+  transition:opacity .3s;
+}
+
+.upload-zone:hover,.upload-zone.drag-active{
+  border-color:var(--cyan);
+  background:rgba(0,245,255,.03);
+}
+
+.upload-zone:hover::before,.upload-zone.drag-active::before{opacity:1}
+
+.upload-zone.drag-active{transform:scale(1.005)}
+
+.uz-corner{
+  position:absolute;
+  width:16px;height:16px;
+  border-color:var(--cyan);
+  border-style:solid;
+  opacity:.6;
+}
+
+.uz-corner.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.uz-corner.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+.uz-corner.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+.uz-corner.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+
+.uz-icon{
+  width:52px;height:52px;
+  border:1px solid var(--border2);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 20px;
+  font-size:1.4rem;
+  transition:all .25s;
+  background:var(--surface2);
+  position:relative;
+  z-index:1;
+}
+
+.upload-zone:hover .uz-icon{
+  border-color:var(--cyan);
+  box-shadow:0 0 24px rgba(0,245,255,.15);
+}
+
+.uz-title{
+  font-family:var(--font-display);
+  font-size:1.5rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  margin-bottom:8px;
+  position:relative;z-index:1;
+}
+
+.uz-sub{
+  font-size:.7rem;
+  color:var(--muted);
+  margin-bottom:24px;
+  letter-spacing:.05em;
+  position:relative;z-index:1;
+}
+
+.filetypes{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:28px;
+  position:relative;z-index:1;
+}
+
+.ft{
+  font-size:.55rem;
+  padding:3px 8px;
+  border:1px solid var(--border2);
+  color:var(--muted);
+  letter-spacing:.1em;
+  transition:all .2s;
+}
+
+.ft.img{border-color:rgba(0,245,255,.2);color:rgba(0,245,255,.6)}
+.ft.vid{border-color:rgba(255,107,43,.2);color:rgba(255,107,43,.6)}
+.ft.aud{border-color:rgba(0,255,136,.2);color:rgba(0,255,136,.6)}
+
+.btn-primary{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:var(--cyan);
+  color:#000;
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  padding:14px 32px;
+  border:none;
+  cursor:pointer;
+  transition:all .2s ease;
+  position:relative;
+  overflow:hidden;
+  z-index:1;
+}
+
+.btn-primary::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.15);
+  transform:translateX(-100%);
+  transition:transform .3s ease;
+}
+
+.btn-primary:hover::after{transform:translateX(0)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,245,255,.3)}
+.btn-primary:active{transform:translateY(0)}
+
+#file-input{display:none}
+
+.progress-wrap{
+  display:none;
+  margin-top:20px;
+  padding:0 4px;
+}
+
+.prog-track{
+  height:2px;
+  background:var(--border);
+  position:relative;
+  overflow:hidden;
+}
+
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--green));
+  width:0%;
+  transition:width .15s ease;
+  position:relative;
+}
+
+.prog-fill::after{
+  content:'';
+  position:absolute;
+  right:0;top:-3px;
+  width:2px;height:8px;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+}
+
+.prog-label{
+  font-size:.58rem;
+  color:var(--muted);
+  margin-top:8px;
+  letter-spacing:.1em;
+}
+
+#results-container{margin-top:12px}
+
+.result-card{
+  display:none;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-top:2px solid var(--green);
+  margin-bottom:8px;
+  animation:fadeUp .3s ease both;
+}
+
+.rc-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 16px;
+  background:rgba(0,255,136,.04);
+  border-bottom:1px solid var(--border);
+}
+
+.rc-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.58rem;
+  color:var(--green);
+  letter-spacing:.12em;
+}
+
+.rc-status::before{content:'✓ '}
+
+.rc-badge{
+  font-size:.5rem;
+  padding:2px 8px;
+  letter-spacing:.1em;
+}
+
+.rc-badge.image{border:1px solid rgba(0,245,255,.3);color:var(--cyan)}
+.rc-badge.video{border:1px solid rgba(255,107,43,.3);color:var(--orange)}
+.rc-badge.file{border:1px solid var(--border);color:var(--muted)}
+
+.rc-url-row{
+  display:flex;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+}
+
+.rc-url{
+  flex:1;
+  padding:13px 16px;
+  font-size:.72rem;
+  color:var(--cyan);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  letter-spacing:.02em;
+}
+
+.btn-copy{
+  padding:13px 18px;
+  background:transparent;
+  border:none;
+  border-left:1px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;
+  font-family:var(--font-mono);
+  font-size:.58rem;
+  letter-spacing:.12em;
+  transition:all .15s;
+  white-space:nowrap;
+}
+
+.btn-copy:hover{background:var(--cyan);color:#000}
+.btn-copy.ok{background:var(--green);color:#000}
+
+.rc-preview{
+  padding:12px 16px;
+  background:#050a10;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:center;
+}
+
+.rc-preview img,.rc-preview video{
+  max-width:100%;
+  max-height:260px;
+  object-fit:contain;
+}
+
+.rc-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:20px;
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+}
+
+.rm-item{display:flex;flex-direction:column;gap:2px}
+
+.rm-k{
+  font-size:.5rem;
+  color:var(--muted2);
+  text-transform:uppercase;
+  letter-spacing:.14em;
+}
+
+.rm-v{font-size:.65rem;color:var(--muted)}
+
+.rc-actions{display:flex}
+
+.rc-btn{
+  flex:1;
+  padding:9px;
+  background:transparent;
+  border:none;
+  border-right:1px solid var(--border);
+  color:var(--muted);
+  font-family:var(--font-mono);
+  font-size:.56rem;
+  letter-spacing:.1em;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.rc-btn:last-child{border-right:none}
+.rc-btn:hover{background:var(--surface2);color:var(--text)}
+.rc-btn.del:hover{background:rgba(255,59,92,.08);color:var(--red)}
+
+.section-head{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  margin-bottom:6px;
+}
+
+.sec-title{
+  font-family:var(--font-display);
+  font-size:1.2rem;
+  font-weight:700;
+  letter-spacing:.1em;
+}
+
+.sec-num{
+  font-size:.58rem;
+  color:var(--muted);
+  letter-spacing:.1em;
+  border:1px solid var(--border);
+  padding:2px 7px;
+}
+
+.sec-sub{
+  font-size:.68rem;
+  color:var(--muted);
+  margin-bottom:22px;
+  letter-spacing:.04em;
+}
+
+.divider{
+  height:1px;
+  background:var(--border);
+  margin:64px 0;
+  position:relative;
+}
+
+.divider::before{
+  content:'';
+  position:absolute;
+  left:0;top:0;
+  width:40px;height:1px;
+  background:var(--cyan);
+  opacity:.6;
+}
+
+.recent-section{padding-bottom:8px}
+
+.file-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:2px;
+}
+
+.fi{
+  background:var(--surface);
+  aspect-ratio:1;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:all .2s;
+  border:1px solid var(--border);
+}
+
+.fi:hover{border-color:var(--cyan);z-index:2}
+
+.fi img,.fi video{width:100%;height:100%;object-fit:cover;display:block}
+
+.fi-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 50%);
+  opacity:0;
+  transition:opacity .2s;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:10px;
+}
+
+.fi:hover .fi-overlay{opacity:1}
+
+.fi-name{
+  font-size:.52rem;
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  letter-spacing:.04em;
+}
+
+.fi-size{
+  font-size:.48rem;
+  color:var(--cyan);
+  margin-top:2px;
+}
+
+.fi-type{
+  position:absolute;
+  top:6px;right:6px;
+  font-size:.45rem;
+  background:rgba(0,0,0,.7);
+  letter-spacing:.1em;
+  padding:2px 5px;
+}
+
+.fi-type.image{color:var(--cyan)}
+.fi-type.video{color:var(--orange)}
+.fi-type.file{color:var(--muted)}
+
+.fi-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;height:100%;
+  font-size:2rem;
+  opacity:.2;
+}
+
+.empty-grid{
+  grid-column:1/-1;
+  text-align:center;
+  padding:48px;
+  border:1px dashed var(--border);
+}
+
+.empty-grid p{
+  font-size:.65rem;
+  color:var(--muted2);
+  letter-spacing:.15em;
+}
+
+.usage-section{padding-bottom:8px}
+
+.usage-tabs{
+  display:flex;
+  gap:0;
+  border-bottom:1px solid var(--border);
+  margin-bottom:0;
+  flex-wrap:wrap;
+}
+
+.utab{
+  padding:10px 18px;
+  font-size:.6rem;
+  letter-spacing:.12em;
+  color:var(--muted);
+  cursor:pointer;
+  border:1px solid transparent;
+  border-bottom:none;
+  transition:all .15s;
+  background:transparent;
+  font-family:var(--font-mono);
+  margin-bottom:-1px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.utab .ti{font-size:.8rem}
+
+.utab:hover{color:var(--text)}
+.utab.active{color:var(--cyan);border-color:var(--border);border-bottom-color:var(--surface);background:var(--surface)}
+
+.usage-panel{
+  display:none;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-top:none;
+}
+
+.usage-panel.active{display:block}
+
+.up-inner{padding:24px}
+
+.up-title{
+  font-family:var(--font-display);
+  font-size:.95rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  margin-bottom:6px;
+}
+
+.up-desc{
+  font-size:.7rem;
+  color:var(--muted);
+  line-height:1.8;
+  margin-bottom:20px;
+  letter-spacing:.03em;
+}
+
+.code-block{
+  background:#040810;
+  border:1px solid var(--border);
+  border-left:2px solid var(--cyan);
+  padding:20px;
+  font-size:.68rem;
+  line-height:1.9;
+  overflow-x:auto;
+  position:relative;
+}
+
+.code-block + .code-block{margin-top:12px;border-left-color:var(--orange)}
+.code-block + .code-block + .code-block{border-left-color:var(--green)}
+
+.cb-label{
+  position:absolute;
+  top:8px;right:12px;
+  font-size:.48rem;
+  color:var(--muted2);
+  letter-spacing:.15em;
+}
+
+.k{color:var(--cyan)}
+.s{color:var(--green)}
+.c{color:var(--muted2)}
+.o{color:var(--orange)}
+.p{color:#c792ea}
+.n{color:#ffcb6b}
+
+.up-steps{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-top:4px;
+}
+
+.step{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+}
+
+.step-num{
+  width:28px;height:28px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.6rem;
+  color:var(--cyan);
+  flex-shrink:0;
+  font-weight:700;
+}
+
+.step-content{
+  flex:1;
+  padding-top:4px;
+}
+
+.step-title{
+  font-size:.72rem;
+  color:var(--text);
+  margin-bottom:4px;
+  letter-spacing:.05em;
+}
+
+.step-desc{
+  font-size:.65rem;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.api-section{padding-bottom:8px}
+
+.api-block{
+  background:var(--surface);
+  border:1px solid var(--border);
+  margin-bottom:2px;
+  transition:border-color .2s;
+}
+
+.api-block:hover{border-color:var(--border2)}
+
+.ab-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 16px;
+  border-bottom:1px solid var(--border);
+}
+
+.method{
+  font-size:.58rem;
+  font-weight:700;
+  padding:3px 8px;
+  letter-spacing:.1em;
+  flex-shrink:0;
+}
+
+.get{background:rgba(0,196,204,.15);color:var(--cyan);border:1px solid rgba(0,196,204,.3)}
+.post{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25)}
+.delete{background:rgba(255,59,92,.1);color:var(--red);border:1px solid rgba(255,59,92,.25)}
+
+.endpoint{
+  font-size:.72rem;
+  color:var(--text);
+  letter-spacing:.03em;
+}
+
+.ab-desc{
+  font-size:.68rem;
+  color:var(--muted);
+  padding:10px 16px;
+  line-height:1.6;
+}
+
+.ab-code{
+  background:#040810;
+  border-top:1px solid var(--border);
+  padding:14px 16px;
+  font-size:.65rem;
+  line-height:1.9;
+  overflow-x:auto;
+}
+
+footer{
+  border-top:1px solid var(--border);
+  padding:28px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:14px;
+}
+
+.foot-left{
+  font-size:.58rem;
+  color:var(--muted2);
+  letter-spacing:.1em;
+  line-height:1.8;
+}
+
+.foot-left span{color:var(--cyan)}
+
+.foot-nav{display:flex;gap:20px}
+
+.foot-nav a{
+  font-size:.58rem;
+  color:var(--muted2);
+  text-decoration:none;
+  letter-spacing:.12em;
+  transition:color .15s;
+}
+
+.foot-nav a:hover{color:var(--cyan)}
+
+.toast{
+  position:fixed;
+  bottom:24px;right:24px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-left:3px solid var(--green);
+  color:var(--text);
+  font-size:.65rem;
+  font-weight:400;
+  letter-spacing:.1em;
+  padding:12px 18px;
+  z-index:9999;
+  transform:translateX(140px);
+  opacity:0;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  max-width:280px;
+}
+
+.toast.show{transform:translateX(0);opacity:1}
+.toast.err{border-left-color:var(--red)}
+
+@media(max-width:600px){
+  h1{font-size:3rem}
+  .hero-stats{flex-direction:column;width:100%}
+  .hstat{border-right:none;border-bottom:1px solid var(--border)}
+  .hstat:last-child{border-bottom:none}
+  .upload-zone{padding:36px 20px}
+  footer{flex-direction:column;align-items:flex-start}
+  .usage-tabs{overflow-x:auto}
+  .file-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+</style>
 </head>
 <body>
 
+<div class="scan-line"></div>
+<div class="scanlines"></div>
+
 <div class="wrap">
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">
-      <span class="logo-main">INCO<span class="logo-dot">.</span>HOST</span>
-      <span class="logo-tag">v1.0</span>
+<header>
+  <div class="logo">
+    <span class="logo-text">INCO<span class="logo-dot">.</span>HOST</span>
+    <span class="logo-ver">v1.0</span>
+  </div>
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    ONLINE &nbsp;|&nbsp; <span class="platform-label" id="platform-name">DETECTING</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="corner-deco">
+    <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="140" cy="140" r="120" stroke="rgba(0,245,255,1)" stroke-width=".5"/>
+      <circle cx="140" cy="140" r="90" stroke="rgba(0,245,255,1)" stroke-width=".5"/>
+      <circle cx="140" cy="140" r="60" stroke="rgba(0,245,255,1)" stroke-width=".5"/>
+      <line x1="20" y1="140" x2="260" y2="140" stroke="rgba(0,245,255,1)" stroke-width=".5"/>
+      <line x1="140" y1="20" x2="140" y2="260" stroke="rgba(0,245,255,1)" stroke-width=".5"/>
+      <line x1="55" y1="55" x2="225" y2="225" stroke="rgba(0,245,255,.5)" stroke-width=".5"/>
+      <line x1="225" y1="55" x2="55" y2="225" stroke="rgba(0,245,255,.5)" stroke-width=".5"/>
+    </svg>
+  </div>
+
+  <div class="hero-line">INSTANT FILE HOSTING</div>
+  <h1>
+    UPLOAD<br>
+    <span class="line2">GET URL</span><br>
+    <span class="line3">SHARE.</span>
+  </h1>
+  <p class="hero-desc">
+    Drop any image or video. Get a direct URL in milliseconds.
+    No account. No watermark. No expiry. Works everywhere — bots, apps, forums, Discord, WhatsApp.
+  </p>
+  <div class="hero-stats">
+    <div class="hstat">
+      <span class="hstat-val" id="stat-files">0</span>
+      <span class="hstat-key">Files Hosted</span>
     </div>
-    <div class="platform-badge">
-      <span class="platform-dot"></span>
-      <span id="platform-name">DETECTING...</span>
+    <div class="hstat">
+      <span class="hstat-val" id="stat-maximg">50MB</span>
+      <span class="hstat-key">Max Image</span>
     </div>
-  </header>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-eyebrow">// INSTANT FILE HOSTING</div>
-    <h1 class="hero-title">
-      UPLOAD.<br>
-      <span class="accent">GET URL.</span><br>
-      <span class="stroke">DONE.</span>
-    </h1>
-    <p class="hero-sub">
-      Drop your images & videos. Get a permanent direct URL in seconds.
-      No account. No limits. No nonsense.
-    </p>
-    <div class="hero-stats">
-      <div class="stat">
-        <span class="stat-value" id="stat-files">0</span>
-        <span class="stat-label">Files Hosted</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="stat-maximg">50MB</span>
-        <span class="stat-label">Max Image</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="stat-maxvid">500MB</span>
-        <span class="stat-label">Max Video</span>
-      </div>
+    <div class="hstat">
+      <span class="hstat-val" id="stat-maxvid">500MB</span>
+      <span class="hstat-key">Max Video</span>
     </div>
-  </section>
-
-  <!-- UPLOAD -->
-  <section class="upload-section">
-    <div class="drop-zone" id="drop-zone">
-      <span class="drop-icon">⬆</span>
-      <div class="drop-title">DROP FILES HERE</div>
-      <p class="drop-sub">or click to browse your device</p>
-      <div class="drop-types">
-        <span class="type-tag">JPG</span>
-        <span class="type-tag">PNG</span>
-        <span class="type-tag">GIF</span>
-        <span class="type-tag">WEBP</span>
-        <span class="type-tag">SVG</span>
-        <span class="type-tag">MP4</span>
-        <span class="type-tag">WEBM</span>
-        <span class="type-tag">MOV</span>
-        <span class="type-tag">MKV</span>
-        <span class="type-tag">PDF</span>
-        <span class="type-tag">MP3</span>
-      </div>
-      <button class="btn-upload" onclick="document.getElementById('file-input').click()">
-        ▲ SELECT FILE
-      </button>
-      <input type="file" id="file-input" accept="image/*,video/*,audio/*,.pdf" multiple />
+    <div class="hstat">
+      <span class="hstat-val">∞</span>
+      <span class="hstat-key">Bandwidth</span>
     </div>
+  </div>
+</section>
 
-    <div class="progress-wrap" id="progress-wrap">
-      <div class="progress-bar-outer">
-        <div class="progress-bar-inner" id="progress-bar"></div>
-      </div>
-      <div class="progress-label" id="progress-label">UPLOADING... 0%</div>
+<section style="padding-bottom:64px">
+  <div class="upload-zone" id="drop-zone">
+    <span class="uz-corner tl"></span>
+    <span class="uz-corner tr"></span>
+    <span class="uz-corner bl"></span>
+    <span class="uz-corner br"></span>
+    <div class="uz-icon">⬆</div>
+    <div class="uz-title">DROP FILES HERE</div>
+    <p class="uz-sub">or click to browse — paste from clipboard supported</p>
+    <div class="filetypes">
+      <span class="ft img">JPG</span>
+      <span class="ft img">PNG</span>
+      <span class="ft img">GIF</span>
+      <span class="ft img">WEBP</span>
+      <span class="ft img">SVG</span>
+      <span class="ft vid">MP4</span>
+      <span class="ft vid">WEBM</span>
+      <span class="ft vid">MOV</span>
+      <span class="ft vid">MKV</span>
+      <span class="ft aud">MP3</span>
+      <span class="ft aud">PDF</span>
     </div>
+    <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+      <span>▲</span> SELECT FILE
+    </button>
+    <input type="file" id="file-input" accept="image/*,video/*,audio/*,.pdf" multiple/>
+  </div>
 
-    <div id="results-container"></div>
-  </section>
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-label" id="prog-label">UPLOADING...</div>
+  </div>
 
-  <div class="divider"></div>
+  <div id="results-container"></div>
+</section>
 
-  <!-- RECENT FILES -->
-  <section class="recent-section">
-    <div class="section-title">RECENT UPLOADS</div>
-    <p class="section-sub">Last 20 files uploaded to this instance</p>
-    <div id="file-grid" class="file-grid">
-      <div class="empty-state" style="grid-column: 1/-1">
-        <p>NO FILES YET — UPLOAD SOMETHING</p>
-      </div>
-    </div>
-  </section>
+<div class="divider"></div>
 
-  <div class="divider"></div>
+<section class="recent-section" style="padding-bottom:64px">
+  <div class="section-head">
+    <div class="sec-title">RECENT UPLOADS</div>
+    <span class="sec-num" id="recent-count">0 FILES</span>
+  </div>
+  <p class="sec-sub">Last 20 files on this instance — click to open</p>
+  <div id="file-grid" class="file-grid">
+    <div class="empty-grid"><p>NO FILES YET — UPLOAD SOMETHING</p></div>
+  </div>
+</section>
 
-  <!-- API DOCS -->
-  <section class="api-section">
-    <div class="section-title">API REFERENCE</div>
-    <p class="section-sub">Use INCO.HOST programmatically in your bots, scripts & apps</p>
+<div class="divider"></div>
 
-    <div class="api-block">
-      <div class="api-block-header">
-        <span class="method-badge method-post">POST</span>
-        <span class="api-endpoint">/api/upload</span>
-      </div>
-      <div class="api-desc">Upload a single file. Returns URL and metadata.</div>
+<section class="usage-section" style="padding-bottom:64px">
+  <div class="section-head">
+    <div class="sec-title">HOW TO USE THE URL</div>
+  </div>
+  <p class="sec-sub">Integrate your hosted files into any project in seconds</p>
+
+  <div class="usage-tabs">
+    <button class="utab active" onclick="switchTab('whatsapp',this)"><span class="ti">💬</span> WHATSAPP BOT</button>
+    <button class="utab" onclick="switchTab('discord',this)"><span class="ti">🎮</span> DISCORD BOT</button>
+    <button class="utab" onclick="switchTab('html',this)"><span class="ti">🌐</span> HTML / WEB</button>
+    <button class="utab" onclick="switchTab('telegram',this)"><span class="ti">✈️</span> TELEGRAM</button>
+    <button class="utab" onclick="switchTab('curl',this)"><span class="ti">⚡</span> cURL / API</button>
+    <button class="utab" onclick="switchTab('markdown',this)"><span class="ti">📝</span> MARKDOWN</button>
+  </div>
+
+  <div id="tab-whatsapp" class="usage-panel active">
+    <div class="up-inner">
+      <div class="up-title">WhatsApp Bot — Baileys (Node.js)</div>
+      <p class="up-desc">Upload a file directly from your bot and send the URL or the media in a message. Works with SHINIGAMI-MD, INCONNU XD, and any Baileys-based bot.</p>
       <div class="code-block">
-<span class="comment"># cURL</span>
-curl -X POST <span id="api-base-url-1">https://your-domain.com</span>/api/upload \
-  -F <span class="val">"file=@image.png"</span>
+        <span class="cb-label">UPLOAD.JS</span>
+<span class="k">const</span> <span class="n">FormData</span> = <span class="k">require</span>(<span class="s">'form-data'</span>);
+<span class="k">const</span> <span class="n">axios</span>   = <span class="k">require</span>(<span class="s">'axios'</span>);
+<span class="k">const</span> <span class="n">fs</span>      = <span class="k">require</span>(<span class="s">'fs'</span>);
 
-<span class="comment"># Response</span>
-{
-  <span class="key">"success"</span>: true,
-  <span class="key">"url"</span>: <span class="val">"https://your-domain.com/f/uuid.png"</span>,
-  <span class="key">"id"</span>: <span class="val">"uuid"</span>,
-  <span class="key">"type"</span>: <span class="val">"image"</span>,
-  <span class="key">"size"</span>: <span class="val">204800</span>,
-  <span class="key">"deleteKey"</span>: <span class="val">"delete-uuid"</span>
+<span class="k">async function</span> <span class="n">uploadToIncoHost</span>(<span class="o">filePath</span>) {
+  <span class="k">const</span> <span class="n">form</span> = <span class="k">new</span> <span class="n">FormData</span>();
+  <span class="n">form</span>.<span class="k">append</span>(<span class="s">'file'</span>, <span class="n">fs</span>.<span class="k">createReadStream</span>(<span class="o">filePath</span>));
+  <span class="k">const</span> { <span class="n">data</span> } = <span class="k">await</span> <span class="n">axios</span>.<span class="k">post</span>(
+    <span class="s">'https://your-app.onrender.com/api/upload'</span>,
+    <span class="n">form</span>, { <span class="n">headers</span>: <span class="n">form</span>.<span class="k">getHeaders</span>() }
+  );
+  <span class="k">return</span> <span class="n">data</span>.<span class="n">url</span>;
+}
+      </div>
+      <div class="code-block">
+        <span class="cb-label">COMMAND</span>
+<span class="c">// Inside your command handler</span>
+<span class="k">case</span> <span class="s">'.upload'</span>: {
+  <span class="k">const</span> <span class="n">quoted</span> = <span class="o">m</span>.<span class="n">quoted</span>;
+  <span class="k">if</span> (!<span class="n">quoted</span>) <span class="k">return</span> <span class="o">m</span>.<span class="k">reply</span>(<span class="s">'Reply to an image or video!'</span>);
+  <span class="k">const</span> <span class="n">buf</span>  = <span class="k">await</span> <span class="n">quoted</span>.<span class="k">download</span>();
+  <span class="k">const</span> <span class="n">tmp</span>  = <span class="s">`/tmp/upload_</span>${<span class="n">Date</span>.<span class="k">now</span>()}<span class="s">`</span>;
+  <span class="n">fs</span>.<span class="k">writeFileSync</span>(<span class="n">tmp</span>, <span class="n">buf</span>);
+  <span class="k">const</span> <span class="n">url</span>  = <span class="k">await</span> <span class="n">uploadToIncoHost</span>(<span class="n">tmp</span>);
+  <span class="n">fs</span>.<span class="k">unlinkSync</span>(<span class="n">tmp</span>);
+  <span class="k">await</span> <span class="o">m</span>.<span class="k">reply</span>(<span class="s">`✅ Uploaded!\n🔗 </span>${<span class="n">url</span>}<span class="s">`</span>);
+  <span class="k">break</span>;
+}
+      </div>
+      <div class="code-block">
+        <span class="cb-label">SEND IMAGE FROM URL</span>
+<span class="c">// Send an image directly from the hosted URL</span>
+<span class="k">await</span> <span class="n">sock</span>.<span class="k">sendMessage</span>(<span class="o">jid</span>, {
+  <span class="n">image</span>: { <span class="n">url</span>: <span class="s">'https://your-app.onrender.com/f/uuid.jpg'</span> },
+  <span class="n">caption</span>: <span class="s">'Here is your image!'</span>
+});
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-discord" class="usage-panel">
+    <div class="up-inner">
+      <div class="up-title">Discord Bot — discord.js v14</div>
+      <p class="up-desc">Upload attachments from Discord commands and store them permanently. Send back the URL or embed the image directly in a reply.</p>
+      <div class="code-block">
+        <span class="cb-label">SLASH COMMAND</span>
+<span class="k">const</span> { <span class="n">SlashCommandBuilder</span> } = <span class="k">require</span>(<span class="s">'discord.js'</span>);
+<span class="k">const</span> <span class="n">FormData</span> = <span class="k">require</span>(<span class="s">'form-data'</span>);
+<span class="k">const</span> <span class="n">axios</span>   = <span class="k">require</span>(<span class="s">'axios'</span>);
+
+<span class="n">module</span>.<span class="n">exports</span> = {
+  <span class="n">data</span>: <span class="k">new</span> <span class="n">SlashCommandBuilder</span>()
+    .<span class="k">setName</span>(<span class="s">'host'</span>)
+    .<span class="k">setDescription</span>(<span class="s">'Upload a file to INCO.HOST'</span>)
+    .<span class="k">addAttachmentOption</span>(<span class="o">opt</span> =>
+      <span class="o">opt</span>.<span class="k">setName</span>(<span class="s">'file'</span>).<span class="k">setDescription</span>(<span class="s">'File to upload'</span>).<span class="k">setRequired</span>(<span class="k">true</span>)
+    ),
+  <span class="k">async</span> <span class="n">execute</span>(<span class="o">interaction</span>) {
+    <span class="k">const</span> <span class="n">att</span>  = <span class="o">interaction</span>.<span class="n">options</span>.<span class="k">getAttachment</span>(<span class="s">'file'</span>);
+    <span class="k">const</span> <span class="n">resp</span> = <span class="k">await</span> <span class="n">axios</span>.<span class="k">get</span>(<span class="n">att</span>.<span class="n">url</span>, { <span class="n">responseType</span>: <span class="s">'arraybuffer'</span> });
+    <span class="k">const</span> <span class="n">form</span> = <span class="k">new</span> <span class="n">FormData</span>();
+    <span class="n">form</span>.<span class="k">append</span>(<span class="s">'file'</span>, <span class="n">Buffer</span>.<span class="k">from</span>(<span class="n">resp</span>.<span class="n">data</span>), <span class="n">att</span>.<span class="n">name</span>);
+    <span class="k">const</span> { <span class="n">data</span> } = <span class="k">await</span> <span class="n">axios</span>.<span class="k">post</span>(
+      <span class="s">'https://your-app.onrender.com/api/upload'</span>, <span class="n">form</span>,
+      { <span class="n">headers</span>: <span class="n">form</span>.<span class="k">getHeaders</span>() }
+    );
+    <span class="k">await</span> <span class="o">interaction</span>.<span class="k">reply</span>({ <span class="n">content</span>: <span class="s">`✅ \`</span>${<span class="n">data</span>.<span class="n">url</span>}<span class="s">\``</span> });
+  }
+};
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-html" class="usage-panel">
+    <div class="up-inner">
+      <div class="up-title">HTML / Web — Display Anywhere</div>
+      <p class="up-desc">Once you have the URL, embed images and videos on any website, forum, or email in seconds.</p>
+      <div class="code-block">
+        <span class="cb-label">IMAGE TAG</span>
+<span class="k">&lt;img</span> <span class="o">src</span>=<span class="s">"https://your-app.onrender.com/f/uuid.jpg"</span>
+     <span class="o">alt</span>=<span class="s">"My image"</span>
+     <span class="o">style</span>=<span class="s">"max-width:100%"</span> <span class="k">/&gt;</span>
+      </div>
+      <div class="code-block">
+        <span class="cb-label">VIDEO TAG</span>
+<span class="k">&lt;video</span> <span class="o">src</span>=<span class="s">"https://your-app.onrender.com/f/uuid.mp4"</span>
+       <span class="o">controls</span> <span class="o">autoplay</span> <span class="o">muted</span> <span class="o">loop</span>
+       <span class="o">style</span>=<span class="s">"width:100%"</span><span class="k">&gt;&lt;/video&gt;</span>
+      </div>
+      <div class="code-block">
+        <span class="cb-label">CSS BACKGROUND</span>
+<span class="k">.hero</span> {
+  <span class="n">background-image</span>: <span class="k">url</span>(<span class="s">'https://your-app.onrender.com/f/uuid.jpg'</span>);
+  <span class="n">background-size</span>: <span class="s">cover</span>;
 }
       </div>
     </div>
+  </div>
 
-    <div class="api-block">
-      <div class="api-block-header">
-        <span class="method-badge method-post">POST</span>
-        <span class="api-endpoint">/api/upload/multi</span>
-      </div>
-      <div class="api-desc">Upload multiple files at once (max 10). Returns array of URLs.</div>
+  <div id="tab-telegram" class="usage-panel">
+    <div class="up-inner">
+      <div class="up-title">Telegram Bot — node-telegram-bot-api</div>
+      <p class="up-desc">Upload photos or videos sent to your Telegram bot and store them permanently with a shareable link.</p>
       <div class="code-block">
-curl -X POST <span id="api-base-url-2">https://your-domain.com</span>/api/upload/multi \
-  -F <span class="val">"files=@img1.jpg"</span> \
-  -F <span class="val">"files=@video.mp4"</span>
+        <span class="cb-label">TELEGRAM BOT</span>
+<span class="k">const</span> <span class="n">TelegramBot</span> = <span class="k">require</span>(<span class="s">'node-telegram-bot-api'</span>);
+<span class="k">const</span> <span class="n">FormData</span>    = <span class="k">require</span>(<span class="s">'form-data'</span>);
+<span class="k">const</span> <span class="n">axios</span>       = <span class="k">require</span>(<span class="s">'axios'</span>);
+
+<span class="k">const</span> <span class="n">bot</span> = <span class="k">new</span> <span class="n">TelegramBot</span>(<span class="s">'YOUR_TOKEN'</span>, { <span class="n">polling</span>: <span class="k">true</span> });
+
+<span class="n">bot</span>.<span class="k">on</span>(<span class="s">'photo'</span>, <span class="k">async</span> (<span class="o">msg</span>) => {
+  <span class="k">const</span> <span class="n">fileId</span>  = <span class="o">msg</span>.<span class="n">photo</span>.<span class="k">at</span>(-<span class="n">1</span>).<span class="n">file_id</span>;
+  <span class="k">const</span> <span class="n">fileUrl</span> = <span class="k">await</span> <span class="n">bot</span>.<span class="k">getFileLink</span>(<span class="n">fileId</span>);
+  <span class="k">const</span> <span class="n">buf</span>     = (<span class="k">await</span> <span class="n">axios</span>.<span class="k">get</span>(<span class="n">fileUrl</span>, { <span class="n">responseType</span>: <span class="s">'arraybuffer'</span> })).<span class="n">data</span>;
+  <span class="k">const</span> <span class="n">form</span>    = <span class="k">new</span> <span class="n">FormData</span>();
+  <span class="n">form</span>.<span class="k">append</span>(<span class="s">'file'</span>, <span class="n">Buffer</span>.<span class="k">from</span>(<span class="n">buf</span>), <span class="s">'photo.jpg'</span>);
+  <span class="k">const</span> { <span class="n">data</span> } = <span class="k">await</span> <span class="n">axios</span>.<span class="k">post</span>(
+    <span class="s">'https://your-app.onrender.com/api/upload'</span>, <span class="n">form</span>,
+    { <span class="n">headers</span>: <span class="n">form</span>.<span class="k">getHeaders</span>() }
+  );
+  <span class="n">bot</span>.<span class="k">sendMessage</span>(<span class="o">msg</span>.<span class="n">chat</span>.<span class="n">id</span>, <span class="s">`🔗 </span>${<span class="n">data</span>.<span class="n">url</span>}<span class="s">`</span>);
+});
       </div>
     </div>
+  </div>
 
-    <div class="api-block">
-      <div class="api-block-header">
-        <span class="method-badge method-get">GET</span>
-        <span class="api-endpoint">/api/file/:id</span>
-      </div>
-      <div class="api-desc">Get metadata for a specific file by ID.</div>
+  <div id="tab-curl" class="usage-panel">
+    <div class="up-inner">
+      <div class="up-title">cURL / REST API</div>
+      <p class="up-desc">Use INCO.HOST from any language or terminal. Full REST API available.</p>
       <div class="code-block">
-curl <span id="api-base-url-3">https://your-domain.com</span>/api/file/<span class="val">uuid</span>
+        <span class="cb-label">SINGLE UPLOAD</span>
+<span class="n">curl</span> -X POST https://your-app.onrender.com/api/upload \
+  -F <span class="s">"file=@/path/to/image.jpg"</span>
       </div>
-    </div>
-
-    <div class="api-block">
-      <div class="api-block-header">
-        <span class="method-badge method-delete">DELETE</span>
-        <span class="api-endpoint">/api/delete/:id?key=deleteKey</span>
-      </div>
-      <div class="api-desc">Delete a file using its ID and delete key.</div>
       <div class="code-block">
-curl -X DELETE <span id="api-base-url-4">https://your-domain.com</span>/api/delete/<span class="val">uuid</span>?key=<span class="val">deleteKey</span>
+        <span class="cb-label">PYTHON</span>
+<span class="k">import</span> <span class="n">requests</span>
+
+<span class="k">with</span> <span class="k">open</span>(<span class="s">'image.jpg'</span>, <span class="s">'rb'</span>) <span class="k">as</span> <span class="n">f</span>:
+    <span class="n">r</span> = <span class="n">requests</span>.<span class="k">post</span>(
+        <span class="s">'https://your-app.onrender.com/api/upload'</span>,
+        <span class="n">files</span>={<span class="s">'file'</span>: <span class="n">f</span>}
+    )
+<span class="k">print</span>(<span class="n">r</span>.<span class="k">json</span>()[<span class="s">'url'</span>])
+      </div>
+      <div class="code-block">
+        <span class="cb-label">RESPONSE</span>
+{
+  <span class="k">"success"</span>: <span class="k">true</span>,
+  <span class="k">"url"</span>:       <span class="s">"https://your-app.onrender.com/f/uuid.jpg"</span>,
+  <span class="k">"id"</span>:        <span class="s">"uuid"</span>,
+  <span class="k">"type"</span>:      <span class="s">"image"</span>,
+  <span class="k">"size"</span>:      <span class="n">204800</span>,
+  <span class="k">"deleteKey"</span>: <span class="s">"delete-uuid"</span>
+}
       </div>
     </div>
+  </div>
 
-    <div class="api-block">
-      <div class="api-block-header">
-        <span class="method-badge method-get">GET</span>
-        <span class="api-endpoint">/api/stats</span>
+  <div id="tab-markdown" class="usage-panel">
+    <div class="up-inner">
+      <div class="up-title">Markdown / Forums / README</div>
+      <p class="up-desc">Embed your files in GitHub README, forum posts, Notion, or any Markdown-compatible platform.</p>
+      <div class="code-block">
+        <span class="cb-label">MARKDOWN IMAGE</span>
+![<span class="o">Alt text</span>](https://your-app.onrender.com/f/uuid.jpg)
       </div>
-      <div class="api-desc">Get platform statistics and file counts.</div>
+      <div class="code-block">
+        <span class="cb-label">MARKDOWN LINK</span>
+[<span class="s">Download video</span>](https://your-app.onrender.com/f/uuid.mp4)
+      </div>
+      <div class="code-block">
+        <span class="cb-label">BBCODE (FORUMS)</span>
+[<span class="k">img</span>]https://your-app.onrender.com/f/uuid.jpg[/<span class="k">img</span>]
+[<span class="k">url</span>]https://your-app.onrender.com/f/uuid.mp4[/<span class="k">url</span>]
+      </div>
+      <div class="code-block">
+        <span class="cb-label">HTML EMAIL</span>
+<span class="k">&lt;img</span> <span class="o">src</span>=<span class="s">"https://your-app.onrender.com/f/uuid.jpg"</span>
+     <span class="o">width</span>=<span class="s">"600"</span> <span class="o">style</span>=<span class="s">"border:0"</span> <span class="k">/&gt;</span>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-left">
-      INCO.HOST — by <span>INCONNU BOY TECH</span> — <span id="footer-platform">—</span>
+<div class="divider"></div>
+
+<section class="api-section" style="padding-bottom:64px">
+  <div class="section-head">
+    <div class="sec-title">API REFERENCE</div>
+  </div>
+  <p class="sec-sub">Complete REST API — integrate from any language or platform</p>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method post">POST</span>
+      <span class="endpoint">/api/upload</span>
     </div>
-    <nav class="footer-nav">
-      <a href="/api/info">API INFO</a>
-      <a href="/api/stats">STATS</a>
-      <a href="/health">HEALTH</a>
-    </nav>
-  </footer>
+    <div class="ab-desc">Upload a single file. Field name: <code>file</code>. Returns direct URL + delete key.</div>
+    <div class="ab-code"><span class="k">curl</span> -X POST <span id="ab-url-1">https://your-app.com</span>/api/upload -F <span class="s">"file=@image.jpg"</span></div>
+  </div>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method post">POST</span>
+      <span class="endpoint">/api/upload/multi</span>
+    </div>
+    <div class="ab-desc">Upload up to 10 files at once. Field name: <code>files</code> (repeated). Returns array of URLs.</div>
+    <div class="ab-code"><span class="k">curl</span> -X POST <span id="ab-url-2">https://your-app.com</span>/api/upload/multi -F <span class="s">"files=@a.jpg"</span> -F <span class="s">"files=@b.mp4"</span></div>
+  </div>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method get">GET</span>
+      <span class="endpoint">/api/file/:id</span>
+    </div>
+    <div class="ab-desc">Get metadata for a file by its ID (no delete key exposed).</div>
+  </div>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method get">GET</span>
+      <span class="endpoint">/api/recent</span>
+    </div>
+    <div class="ab-desc">Returns last 20 uploaded files with URLs and metadata.</div>
+  </div>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method get">GET</span>
+      <span class="endpoint">/api/stats</span>
+    </div>
+    <div class="ab-desc">Returns total file count, size breakdown by type, and platform info.</div>
+  </div>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method delete">DELETE</span>
+      <span class="endpoint">/api/delete/:id?key=deleteKey</span>
+    </div>
+    <div class="ab-desc">Permanently delete a file. Requires the <code>deleteKey</code> returned at upload time.</div>
+    <div class="ab-code"><span class="k">curl</span> -X DELETE <span id="ab-url-3">https://your-app.com</span>/api/delete/<span class="o">uuid</span>?key=<span class="o">deleteKey</span></div>
+  </div>
+
+  <div class="api-block">
+    <div class="ab-head">
+      <span class="method get">GET</span>
+      <span class="endpoint">/api/info</span>
+    </div>
+    <div class="ab-desc">Returns detected platform, base URL, and file size limits.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-left">
+    INCO.HOST — by <span>INCONNU BOY TECH</span><br>
+    Platform: <span id="footer-platform">—</span>
+  </div>
+  <nav class="foot-nav">
+    <a href="/api/info">INFO</a>
+    <a href="/api/stats">STATS</a>
+    <a href="/health">HEALTH</a>
+    <a href="/api/recent">RECENT</a>
+  </nav>
+</footer>
 
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-  
-  let BASE_URL = '';
-  let currentDeleteKeys = {};
+let BASE_URL = '';
+const deleteKeys = {};
 
-  async function init() {
-    try {
-      const res = await fetch('/api/info');
-      const info = await res.json();
-      BASE_URL = info.baseURL;
-
-      document.getElementById('platform-name').textContent =
-        `${info.platformIcon} ${info.platform.toUpperCase()}`;
-      document.getElementById('footer-platform').textContent =
-        `${info.platformIcon} ${info.platform}`;
-      document.getElementById('stat-maximg').textContent =
-        formatSize(info.maxImageSize);
-      document.getElementById('stat-maxvid').textContent =
-        formatSize(info.maxVideoSize);
-
-      
-      ['api-base-url-1','api-base-url-2','api-base-url-3','api-base-url-4'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = BASE_URL;
-      });
-
-      loadStats();
-      loadRecent();
-    } catch (e) {
-      console.error('Init failed', e);
-    }
-  }
-
-  async function loadStats() {
-    try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      document.getElementById('stat-files').textContent = data.totalFiles;
-    } catch {}
-  }
-
-  async function loadRecent() {
-    try {
-      const res = await fetch('/api/recent');
-      const data = await res.json();
-      renderFileGrid(data.files);
-    } catch {}
-  }
-
-  
-  document.getElementById('file-input').addEventListener('change', e => {
-    const files = Array.from(e.target.files);
-    if (files.length > 0) uploadFiles(files);
-    e.target.value = '';
-  });
-
-  async function uploadFiles(files) {
-    const progressWrap = document.getElementById('progress-wrap');
-    const progressBar = document.getElementById('progress-bar');
-    const progressLabel = document.getElementById('progress-label');
-
-    progressWrap.style.display = 'block';
-    document.getElementById('results-container').innerHTML = '';
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      progressLabel.textContent = `UPLOADING ${i+1}/${files.length}: ${file.name}`;
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-
-          xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-              const pct = Math.round((e.loaded / e.total) * 100);
-              progressBar.style.width = pct + '%';
-              progressLabel.textContent = `UPLOADING ${i+1}/${files.length}: ${file.name} — ${pct}%`;
-            }
-          });
-
-          xhr.addEventListener('load', () => {
-            if (xhr.status === 200) {
-              const data = JSON.parse(xhr.responseText);
-              renderResult(data);
-              resolve();
-            } else {
-              const err = JSON.parse(xhr.responseText);
-              showToast(err.error || 'Upload failed', true);
-              reject();
-            }
-          });
-
-          xhr.addEventListener('error', () => {
-            showToast('Network error during upload', true);
-            reject();
-          });
-
-          xhr.open('POST', '/api/upload');
-          xhr.send(formData);
-        });
-
-      } catch {}
-    }
-
-    progressWrap.style.display = 'none';
-    progressBar.style.width = '0%';
+async function init() {
+  try {
+    const res = await fetch('/api/info');
+    const info = await res.json();
+    BASE_URL = info.baseURL;
+    document.getElementById('platform-name').textContent = `${info.platformIcon} ${info.platform.toUpperCase()}`;
+    document.getElementById('footer-platform').textContent = `${info.platformIcon} ${info.platform}`;
+    document.getElementById('stat-maximg').textContent = fmtSize(info.maxImageSize);
+    document.getElementById('stat-maxvid').textContent = fmtSize(info.maxVideoSize);
+    ['ab-url-1','ab-url-2','ab-url-3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = BASE_URL;
+    });
     loadStats();
     loadRecent();
-  }
+  } catch(e) {}
+}
 
-  
-  function renderResult(data) {
-    currentDeleteKeys[data.id] = data.deleteKey;
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const d = await r.json();
+    document.getElementById('stat-files').textContent = d.totalFiles;
+  } catch(e) {}
+}
 
-    const card = document.createElement('div');
-    card.className = 'result-card';
-    card.id = `result-${data.id}`;
-    card.style.display = 'block';
+async function loadRecent() {
+  try {
+    const r = await fetch('/api/recent');
+    const d = await r.json();
+    document.getElementById('recent-count').textContent = `${d.total} FILES`;
+    renderGrid(d.files);
+  } catch(e) {}
+}
 
-    const previewHTML = data.type === 'image'
-      ? `<div class="result-preview"><img src="${data.url}" alt="preview" /></div>`
-      : data.type === 'video'
-      ? `<div class="result-preview"><video src="${data.url}" controls muted playsinline></video></div>`
-      : '';
+document.getElementById('file-input').addEventListener('change', e => {
+  const files = Array.from(e.target.files);
+  if (files.length) uploadFiles(files);
+  e.target.value = '';
+});
 
-    card.innerHTML = `
-      <div class="result-header">
-        <div class="result-status">
-          ✓ UPLOAD SUCCESSFUL
-        </div>
-        <span class="result-type-badge">${data.type.toUpperCase()}</span>
-      </div>
-      <div class="result-url-row">
-        <div class="result-url" title="${data.url}">${data.url}</div>
-        <button class="btn-copy" onclick="copyURL('${data.url}', this)">COPY URL</button>
-      </div>
-      ${previewHTML}
-      <div class="result-meta">
-        <div class="meta-item">
-          <span class="meta-key">Original Name</span>
-          <span class="meta-val">${data.originalName}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-key">Size</span>
-          <span class="meta-val">${formatSize(data.size)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-key">Type</span>
-          <span class="meta-val">${data.mimeType}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-key">ID</span>
-          <span class="meta-val">${data.id.slice(0, 8)}...</span>
-        </div>
-      </div>
-      <div class="result-actions">
-        <button class="result-action-btn" onclick="copyURL('${data.url}', this)">⬡ COPY</button>
-        <button class="result-action-btn" onclick="window.open('${data.url}', '_blank')">↗ OPEN</button>
-        <button class="result-action-btn" onclick="copyMarkdown('${data.url}', '${data.originalName}', '${data.type}')">[ ] MARKDOWN</button>
-        <button class="result-action-btn" onclick="copyBBCode('${data.url}', '${data.type}')">{ } BBCODE</button>
-        <button class="result-action-btn danger" onclick="deleteFile('${data.id}', '${data.deleteKey}', this)">✕ DELETE</button>
-      </div>
-    `;
+async function uploadFiles(files) {
+  const pw = document.getElementById('progress-wrap');
+  const pf = document.getElementById('prog-fill');
+  const pl = document.getElementById('prog-label');
+  pw.style.display = 'block';
+  document.getElementById('results-container').innerHTML = '';
 
-    document.getElementById('results-container').prepend(card);
-    showToast('FILE UPLOADED — URL READY');
-  }
-
-  
-  function renderFileGrid(files) {
-    const grid = document.getElementById('file-grid');
-    if (!files || files.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>NO FILES YET — UPLOAD SOMETHING</p></div>`;
-      return;
-    }
-
-    grid.innerHTML = files.map(f => {
-      const isImage = f.type === 'image';
-      const isVideo = f.type === 'video';
-      const icon = isImage ? '🖼' : isVideo ? '🎥' : '📄';
-
-      const mediaHTML = isImage
-        ? `<img src="${f.url}" alt="${f.originalName}" loading="lazy" />`
-        : isVideo
-        ? `<video src="${f.url}" muted playsinline></video>`
-        : `<div class="file-icon-wrap">${icon}</div>`;
-
-      return `
-        <div class="file-item" onclick="window.open('${f.url}', '_blank')">
-          ${mediaHTML}
-          <span class="file-type-badge-grid">${f.type.toUpperCase()}</span>
-          <div class="file-item-overlay">
-            <div class="file-item-name">${f.originalName}</div>
-            <div class="file-item-size">${formatSize(f.size)}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  
-  const dropZone = document.getElementById('drop-zone');
-
-  dropZone.addEventListener('click', e => {
-    if (e.target.tagName === 'BUTTON') return;
-    document.getElementById('file-input').click();
-  });
-
-  dropZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-
-  dropZone.addEventListener('dragleave', e => {
-    if (!dropZone.contains(e.relatedTarget)) {
-      dropZone.classList.remove('drag-over');
-    }
-  });
-
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) uploadFiles(files);
-  });
-
-  
-  document.addEventListener('paste', e => {
-    const files = Array.from(e.clipboardData.files);
-    if (files.length > 0) uploadFiles(files);
-  });
-
-  
-  function copyURL(url, btn) {
-    navigator.clipboard.writeText(url).then(() => {
-      if (btn && btn.classList) {
-        const orig = btn.textContent;
-        btn.textContent = '✓ COPIED';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = orig;
-          btn.classList.remove('copied');
-        }, 2000);
-      }
-      showToast('URL COPIED TO CLIPBOARD');
-    });
-  }
-
-  function copyMarkdown(url, name, type) {
-    const md = type === 'image' ? `![${name}](${url})` : `[${name}](${url})`;
-    navigator.clipboard.writeText(md).then(() => showToast('MARKDOWN COPIED'));
-  }
-
-  function copyBBCode(url, type) {
-    const bb = type === 'image' ? `[img]${url}[/img]` : `[url]${url}[/url]`;
-    navigator.clipboard.writeText(bb).then(() => showToast('BBCODE COPIED'));
-  }
-
-  async function deleteFile(id, key, btn) {
-    if (!confirm('Delete this file permanently?')) return;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    pl.textContent = `UPLOADING ${i+1}/${files.length}: ${file.name}`;
+    const fd = new FormData();
+    fd.append('file', file);
     try {
-      const res = await fetch(`/api/delete/${id}?key=${key}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        const card = document.getElementById(`result-${id}`);
-        if (card) card.remove();
-        showToast('FILE DELETED');
-        loadRecent();
-        loadStats();
-      } else {
-        showToast(data.error || 'Delete failed', true);
-      }
-    } catch {
-      showToast('Delete failed', true);
-    }
+      await new Promise((res, rej) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', e => {
+          if (e.lengthComputable) {
+            const p = Math.round(e.loaded/e.total*100);
+            pf.style.width = p + '%';
+            pl.textContent = `UPLOADING ${i+1}/${files.length}: ${file.name} — ${p}%`;
+          }
+        });
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200) { renderResult(JSON.parse(xhr.responseText)); res(); }
+          else { showToast((JSON.parse(xhr.responseText)).error || 'Upload failed', true); rej(); }
+        });
+        xhr.addEventListener('error', () => { showToast('Network error', true); rej(); });
+        xhr.open('POST', '/api/upload');
+        xhr.send(fd);
+      });
+    } catch(e) {}
   }
 
-  
-  function showToast(msg, isError = false) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.toggle('error', isError);
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2800);
-  }
+  pw.style.display = 'none';
+  pf.style.width = '0%';
+  loadStats();
+  loadRecent();
+}
 
-  
-  function formatSize(bytes) {
-    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + 'GB';
-    if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + 'MB';
-    if (bytes >= 1024) return (bytes / 1024).toFixed(0) + 'KB';
-    return bytes + 'B';
-  }
+function renderResult(data) {
+  deleteKeys[data.id] = data.deleteKey;
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.id = `rc-${data.id}`;
+  card.style.display = 'block';
 
-  init();
+  const preview = data.type === 'image'
+    ? `<div class="rc-preview"><img src="${data.url}" alt="preview"/></div>`
+    : data.type === 'video'
+    ? `<div class="rc-preview"><video src="${data.url}" controls muted playsinline></video></div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="rc-head">
+      <div class="rc-status">UPLOAD COMPLETE</div>
+      <span class="rc-badge ${data.type}">${data.type.toUpperCase()}</span>
+    </div>
+    <div class="rc-url-row">
+      <div class="rc-url" title="${data.url}">${data.url}</div>
+      <button class="btn-copy" onclick="copyText('${data.url}',this,'COPY URL','✓ COPIED')">COPY URL</button>
+    </div>
+    ${preview}
+    <div class="rc-meta">
+      <div class="rm-item"><span class="rm-k">File</span><span class="rm-v">${data.originalName}</span></div>
+      <div class="rm-item"><span class="rm-k">Size</span><span class="rm-v">${fmtSize(data.size)}</span></div>
+      <div class="rm-item"><span class="rm-k">Type</span><span class="rm-v">${data.mimeType}</span></div>
+      <div class="rm-item"><span class="rm-k">ID</span><span class="rm-v">${data.id.slice(0,12)}...</span></div>
+    </div>
+    <div class="rc-actions">
+      <button class="rc-btn" onclick="copyText('${data.url}',this,'⬡ COPY','✓ OK')">⬡ COPY</button>
+      <button class="rc-btn" onclick="window.open('${data.url}','_blank')">↗ OPEN</button>
+      <button class="rc-btn" onclick="copyText('![img](${data.url})',this,'[ ] MD','✓ OK')">[ ] MARKDOWN</button>
+      <button class="rc-btn" onclick="copyText('[img]${data.url}[/img]',this,'{ } BB','✓ OK')">{ } BBCODE</button>
+      <button class="rc-btn del" onclick="delFile('${data.id}','${data.deleteKey}',this)">✕ DELETE</button>
+    </div>
+  `;
+  document.getElementById('results-container').prepend(card);
+  showToast('FILE UPLOADED — URL READY');
+}
+
+function renderGrid(files) {
+  const g = document.getElementById('file-grid');
+  if (!files || !files.length) {
+    g.innerHTML = `<div class="empty-grid"><p>NO FILES YET — UPLOAD SOMETHING</p></div>`;
+    return;
+  }
+  g.innerHTML = files.map(f => {
+    const isImg = f.type === 'image', isVid = f.type === 'video';
+    const media = isImg ? `<img src="${f.url}" loading="lazy" alt=""/>` : isVid ? `<video src="${f.url}" muted playsinline></video>` : `<div class="fi-icon">📄</div>`;
+    return `<div class="fi" onclick="window.open('${f.url}','_blank')">${media}<span class="fi-type ${f.type}">${f.type.toUpperCase()}</span><div class="fi-overlay"><div class="fi-name">${f.originalName}</div><div class="fi-size">${fmtSize(f.size)}</div></div></div>`;
+  }).join('');
+}
+
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('click', e => { if (e.target.tagName==='BUTTON') return; document.getElementById('file-input').click(); });
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-active'); });
+dz.addEventListener('dragleave', e => { if (!dz.contains(e.relatedTarget)) dz.classList.remove('drag-active'); });
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-active'); const f = Array.from(e.dataTransfer.files); if (f.length) uploadFiles(f); });
+document.addEventListener('paste', e => { const f = Array.from(e.clipboardData.files); if (f.length) uploadFiles(f); });
+
+function copyText(text, btn, orig, ok) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (btn) { const t = btn.textContent; btn.textContent = ok; btn.classList.add('ok'); setTimeout(()=>{ btn.textContent = orig||t; btn.classList.remove('ok'); }, 1800); }
+    showToast('COPIED TO CLIPBOARD');
+  });
+}
+
+async function delFile(id, key, btn) {
+  if (!confirm('Delete this file permanently?')) return;
+  try {
+    const r = await fetch(`/api/delete/${id}?key=${key}`, { method: 'DELETE' });
+    const d = await r.json();
+    if (d.success) {
+      const card = document.getElementById(`rc-${id}`);
+      if (card) { card.style.opacity='0'; card.style.transform='scale(.97)'; setTimeout(()=>card.remove(),300); }
+      showToast('FILE DELETED');
+      loadRecent(); loadStats();
+    } else showToast(d.error||'Delete failed', true);
+  } catch(e) { showToast('Delete failed', true); }
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.utab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.usage-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (err?' err':'') + ' show';
+  setTimeout(()=>{ t.className='toast'+(err?' err':''); }, 2800);
+}
+
+function fmtSize(b) {
+  if (b>=1073741824) return (b/1073741824).toFixed(1)+'GB';
+  if (b>=1048576) return (b/1048576).toFixed(0)+'MB';
+  if (b>=1024) return (b/1024).toFixed(0)+'KB';
+  return b+'B';
+}
+
+init();
 </script>
 </body>
 </html>
