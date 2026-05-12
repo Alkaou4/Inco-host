@@ -18,7 +18,7 @@ Upload images and videos, get instant shareable URLs. No registration. No accoun
 - **Zero config deploy** — works on Render & Heroku out of the box
 
 ---
-##h demo app live 
+### demo app live 
 
 👉 : https://inco-host-production.up.railway.app
 ---
